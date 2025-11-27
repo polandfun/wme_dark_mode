@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Dark Mode
 // @namespace    https://greasyfork.org/en/users/1434751-poland-fun
-// @version      1.08
+// @version      1.09
 // @description  Enable dark mode in WME.
 // @author       poland_fun
 // @contributor	 kid4rm90s and luan_tavares_127
@@ -129,6 +129,8 @@ Version
 1.08 - Fixed -
         - Hover on segment restriction table
         - Waze Edit Count Session History
+1.09. - Fixed -
+		- Clicksaver road type chip border color override in compact mode
 
 */
 
@@ -141,7 +143,7 @@ Version
 (function main() {
 	"use strict";
 
-	const updateMessage  = 'Fixed -<br>- Hover on segment restriction table<br>- Waze Edit Count Session History';
+	const updateMessage  = 'Fixed -<br>- Clicksaver road type chip border color override in compact mode ';
 	const scriptName     = GM_info.script.name;
 	const scriptVersion  = GM_info.script.version;
 	const downloadUrl    = 'https://greasyfork.org/scripts/526924-wme-dark-mode/code/WME%20Dark%20Mode.user.js';
@@ -1880,6 +1882,34 @@ Version
         childList: true,
         subtree: true
     });
+
+	// -----------------------------------------for the clicksaver road type chip border color override in compact mode -------------------------------------------
+  // Override road type chip border color from black to red
+  function setBorderOnCheckedChips() {
+    // Only apply if dark mode is active
+    if (document.documentElement.getAttribute('wz-theme') === 'dark') {
+      document.querySelectorAll('wz-checkable-chip.cs-compact-button[checked]').forEach((chip) => {
+        if (chip.shadowRoot) {
+          const div = chip.shadowRoot.querySelector('div');
+          if (div) {
+            div.style.setProperty('border', '2px solid #00ff15ff', 'important');
+          }
+        }
+      });
+    }
+  }
+
+  // Run once after page load (delay to let other scripts finish)
+  setTimeout(setBorderOnCheckedChips, 500);
+
+  // Observe for changes and re-apply as needed
+  const Chipobserver = new MutationObserver(() => {
+    // Only run if dark mode is active
+    if (document.documentElement.getAttribute('wz-theme') === 'dark') {
+      requestAnimationFrame(setBorderOnCheckedChips);
+    }
+  });
+  Chipobserver.observe(document.body, { childList: true, subtree: true });
 
 	function sandboxBootstrap() {
 		if (WazeWrap?.Ready) {
